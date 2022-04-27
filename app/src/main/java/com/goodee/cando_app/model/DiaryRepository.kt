@@ -5,10 +5,16 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.goodee.cando_app.database.FireStoreDatabase
 import com.goodee.cando_app.database.RealTimeDatabase
 import com.goodee.cando_app.dto.DiaryDto
+import com.goodee.cando_app.viewmodel.DiaryViewModel
+import com.google.firebase.Timestamp
 import com.google.firebase.database.*
+import java.util.*
+import kotlin.collections.HashMap
 
+const val COLLECTION_NAME = "diary"
 class DiaryRepository(val application: Application) {
     private val TAG: String = "로그"
     private val _diaryListLiveData: MutableLiveData<List<DiaryDto>> = MutableLiveData()
@@ -21,22 +27,18 @@ class DiaryRepository(val application: Application) {
     // 게시글 조회(게시글 클릭 시 1개의 게시글을 읽음)
     fun getDiary(dno: String) {
         Log.d(TAG,"AppRepository - getDiary() called")
-        RealTimeDatabase.getDatabase().child("Diary/${dno}").get().addOnCompleteListener { task ->
+        FireStoreDatabase.getDatabase().collection(COLLECTION_NAME).document(dno).get().addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val map = mutableMapOf<String, String>()
-                task.result?.children?.forEach { child ->
-                    Log.d(TAG,"AppRepository - key : ${child.key} value : ${child.value}")
-                    map[child.key.toString()] = child.value.toString()
-                }
+                task.result?.let {  result ->
+                    val title = result["title"]
+                    val content = result["content"]
+                    val author = result["author"]
+                    val date: Timestamp = result["date"] as Timestamp
 
-                val title = map["title"]
-                val content = map["content"]
-                val author = map["author"]
-                val date = map["date"]
-                if (title != null && content != null && author != null && date != null) {
-                    val diaryDto = DiaryDto(dno = dno, title = title, content = content, author = author, date = date.toLong())
-                    _diaryLiveData.value = diaryDto
+                    _diaryLiveData.value = DiaryDto(dno = dno, title = title as String, content = content as String, author = author as String, date = date.toDate())
                 }
+            } else {
+                Toast.makeText(application.applicationContext, "글을 읽는데 실패하였습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -55,7 +57,7 @@ class DiaryRepository(val application: Application) {
                     val dno = ds.key
                     val author = ds.child("author").value.toString()
                     val title = ds.child("title").value.toString()
-                    val date = ds.child("date").value.toString().toLong()
+                    val date = Date(ds.child("date").value.toString().toLong())
                     diaryList.add(DiaryDto(dno = dno, title = title, content = "", author = author, date = date))
                 }
                 diaryList.reverse()

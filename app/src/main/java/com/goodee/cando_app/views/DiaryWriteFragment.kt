@@ -17,6 +17,7 @@ import com.goodee.cando_app.viewmodel.DiaryViewModel
 import com.google.firebase.auth.FirebaseAuth
 import java.lang.Exception
 import java.text.SimpleDateFormat
+import java.util.*
 
 class DiaryWriteFragment : Fragment() {
     private val TAG: String = "로그"
@@ -46,7 +47,7 @@ class DiaryWriteFragment : Fragment() {
         titleInputView = view.findViewById<EditText>(R.id.edittext_diarywrite_titleinput)
         contentView = view.findViewById<EditText>(R.id.edittext_diarywrite_contentinput)
 
-        diaryViewModel.diaryLiveData.observe(viewLifecycleOwner, Observer { diaryDto ->
+        diaryViewModel.diaryLiveData.observe(viewLifecycleOwner, { diaryDto ->
             titleInputView.setText(diaryDto.title)
             contentView.setText(diaryDto.content)
         })
@@ -57,8 +58,8 @@ class DiaryWriteFragment : Fragment() {
 
     private fun setEvent() {
         Log.d(TAG,"DiaryWriteFragment - setEvent() called")
-        writeButton?.setOnClickListener {
-            Log.d(TAG,"DiaryWriteFragment - dno : ${dno}")
+        writeButton.setOnClickListener {
+            Log.d(TAG,"DiaryWriteFragment - dno : $dno")
             val title = titleInputView.text.toString()
             val content = contentView.text.toString()
             val userEmail = FirebaseAuth.getInstance().currentUser?.email.toString()
@@ -73,17 +74,19 @@ class DiaryWriteFragment : Fragment() {
 
     private fun writeDiary(dno: String, title: String, content: String, userEmail: String) {
         Log.d(TAG,"DiaryWriteFragment - writeButton is clicked.")
-        val time = System.currentTimeMillis()
+        val time = Date()
         val diaryDto = DiaryDto(dno = dno, title = title, content = content, author = userEmail, date = time)
         diaryViewModel.writeDiary(diaryDto)
 
         findNavController().navigate(R.id.action_diaryWriteFragment_to_diaryFragment)
     }
+
     private fun editDiary(dno: String, title: String, content: String, userEmail: String) {
         Log.d(TAG,"DiaryWriteFragment - editDiary() called")
-        val time = System.currentTimeMillis()
+        val time = Date()
         val diaryDto = DiaryDto(dno = dno, title = title, content = content, author = userEmail, date= time)
         diaryViewModel.editDiary(diaryDto)
+
         findNavController().navigate(DiaryWriteFragmentDirections.actionDiaryWriteFragmentToDiaryViewFragment(dno))
     }
 }

@@ -33,7 +33,7 @@ class DiaryViewFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dno = arguments?.get("dno").toString()
-        diaryViewModel.getDiary(dno)
+        diaryViewModel.getDiary("1")
     }
 
     override fun onCreateView(
@@ -46,9 +46,9 @@ class DiaryViewFragment : Fragment() {
         diaryViewModel.diaryLiveData.observe(viewLifecycleOwner) { diaryDto ->
             Log.d(TAG, "DiaryViewFragment - diaryLivedata change")
             if (diaryDto != null) {
-                binding.textviewDiaryviewTitleview.text = "제목 : " + diaryDto.title
+                binding.textviewDiaryviewTitleview.text = diaryDto.title
                 binding.textviewDiaryviewContentview.text = diaryDto.content
-                binding.textviewDiaryviewAuthorview.text = "작성자 : " + diaryDto.author
+                binding.textviewDiaryviewAuthorview.text = diaryDto.author
             }
         }
         setEvent()
