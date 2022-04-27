@@ -47,10 +47,10 @@ class DiaryWriteFragment : Fragment() {
         titleInputView = view.findViewById<EditText>(R.id.edittext_diarywrite_titleinput)
         contentView = view.findViewById<EditText>(R.id.edittext_diarywrite_contentinput)
 
-        diaryViewModel.diaryLiveData.observe(viewLifecycleOwner, { diaryDto ->
+        diaryViewModel.diaryLiveData.observe(viewLifecycleOwner) { diaryDto ->
             titleInputView.setText(diaryDto.title)
             contentView.setText(diaryDto.content)
-        })
+        }
         setEvent()
 
         return view
