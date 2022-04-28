@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.goodee.cando_app.R
@@ -22,18 +21,12 @@ class DiaryViewFragment : Fragment() {
     private val diaryViewModel: DiaryViewModel by lazy {
         ViewModelProvider(this).get(DiaryViewModel::class.java)
     }
-    private val userViewModel by lazy {
-        ViewModelProvider(requireActivity(), object: ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return UserViewModel(requireActivity().application) as T
-            }
-        }).get(UserViewModel::class.java)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dno = arguments?.get("dno").toString()
-        diaryViewModel.getDiary("1")
+        Log.d(TAG,"DiaryViewFragment - onCreate dno : $dno called")
+        diaryViewModel.getDiary(dno)
     }
 
     override fun onCreateView(
@@ -60,6 +53,7 @@ class DiaryViewFragment : Fragment() {
     private fun setEvent() {
         binding.buttonDiaryviewEditbutton.setOnClickListener {
             Log.d(TAG,"DiaryViewFragment - editButton is clicked.")
+            Log.d(TAG,"DiaryViewFragment - setEvent() called")
             findNavController().navigate(DiaryViewFragmentDirections.actionDiaryViewFragmentToDiaryWriteFragment(dno))
         }
         binding.buttonDiaryviewDeletebutton.setOnClickListener {
