@@ -10,6 +10,7 @@ import com.goodee.cando_app.database.FireStoreDatabase
 import com.goodee.cando_app.database.RealTimeDatabase
 import com.goodee.cando_app.dto.DiaryDto
 import com.google.firebase.Timestamp
+import java.lang.Exception
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -44,6 +45,7 @@ class DiaryRepository(val application: Application) {
     // 게시글 목록 가져오기(로그인시 바로 보이는 게시글들)
     fun getDiaryList() {
         Log.d(TAG,"AppRepository - getDiaryList() called")
+
         val database = FireStoreDatabase.getDatabase()
         database.collection(COLLECTION_NAME).get().addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -68,47 +70,30 @@ class DiaryRepository(val application: Application) {
     // 게시글 작성
     fun writeDiary(diaryDto: DiaryDto) {
         Log.d(TAG,"AppRepository - writeDiary() called")
-        val diaryRef = RealTimeDatabase.getDatabase().child("Diary").ref
-        val key = diaryRef.push().key
-        val lastDno = diaryRef.limitToLast(1).get().addOnCompleteListener {
-            Log.d(TAG,"AppRepository - it : ${it.result}")
-        }
-        if (!lastDno.isSuccessful) {
-            Log.d(TAG,"AppRepository - diaryRef.limitToLast(1).get().isSuccessful : false")
-            return
-        }
-        Log.d(TAG,"AppRepository - lastDno : ${lastDno.result}")
 
-        val diary = HashMap<String, DiaryDto>()
-        key?.let {
-            diary.put(key, diaryDto)
-        }
-
-        val firebaseDatabase = RealTimeDatabase.getDatabase()
-        firebaseDatabase.child("Diary/${key}").setValue(diaryDto).addOnCompleteListener { task ->       // Diary/${key}에 글 저장하기
-            Log.d(TAG,"AppRepository - task.isSuccessful : ${task.isSuccessful}")
-            if (task.isSuccessful) Toast.makeText(application, "글 작성 성공", Toast.LENGTH_SHORT).show()
-            else Toast.makeText(application, "글 작성 실패", Toast.LENGTH_SHORT).show()
+        val database = FireStoreDatabase.getDatabase()
+        database.collection(COLLECTION_NAME).add(diaryDto).addOnFailureListener {
+            throw Exception("글 작성 실패")
         }
     }
 
     // 게시글 수정하기
     fun editDiary(diaryDto: DiaryDto) {
         Log.d(TAG,"AppRepository - editDiary() called")
-        val cloudStore = FireStoreDatabase.getDatabase()
 
+        val cloudStore = FireStoreDatabase.getDatabase()
         cloudStore.collection(COLLECTION_NAME).document(diaryDto.dno).set(diaryDto).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                Log.d(TAG,"AppRepository - 글 수정 성공")
                 _diaryLiveData.postValue(diaryDto)
             } else {
-                Log.d(TAG,"AppRepository - 글 수정 실패")
+                throw Exception("글 수정 실패")
             }
         }
     }
 
     fun deleteDiary(dno: String) {
         Log.d(TAG,"AppRepository - deleteDiary() called")
+
         val cloudStore = FireStoreDatabase.getDatabase()
         cloudStore.collection(COLLECTION_NAME).document(dno).delete().addOnCompleteListener { task ->
             Log.d(TAG,"AppRepository - task.isSuccessful : ${task.isSuccessful}")
