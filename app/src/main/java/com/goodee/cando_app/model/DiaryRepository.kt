@@ -9,10 +9,7 @@ import com.goodee.cando_app.R
 import com.goodee.cando_app.database.FireStoreDatabase
 import com.goodee.cando_app.database.RealTimeDatabase
 import com.goodee.cando_app.dto.DiaryDto
-import com.goodee.cando_app.viewmodel.DiaryViewModel
 import com.google.firebase.Timestamp
-import com.google.firebase.database.*
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -98,14 +95,9 @@ class DiaryRepository(val application: Application) {
     // 게시글 수정하기
     fun editDiary(diaryDto: DiaryDto) {
         Log.d(TAG,"AppRepository - editDiary() called")
-        val firebaseDatabase = RealTimeDatabase.getDatabase()
-        val map = HashMap<String, Any>()
-        map["title"] = diaryDto.title
-        map["content"] = diaryDto.content
-        map["author"] = diaryDto.author
-        map["date"] = diaryDto.date
-        Log.d(TAG,"AppRepository - map : $map")
-        firebaseDatabase.child("Diary/${diaryDto.dno}").updateChildren(map).addOnCompleteListener { task ->
+        val cloudStore = FireStoreDatabase.getDatabase()
+
+        cloudStore.collection(COLLECTION_NAME).document(diaryDto.dno).set(diaryDto).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Log.d(TAG,"AppRepository - 글 수정 성공")
                 _diaryLiveData.postValue(diaryDto)
