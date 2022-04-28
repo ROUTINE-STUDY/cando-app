@@ -8,15 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.goodee.cando_app.R
 import com.goodee.cando_app.dto.DiaryDto
 import com.goodee.cando_app.viewmodel.DiaryViewModel
 import com.google.firebase.auth.FirebaseAuth
-import java.lang.Exception
-import java.text.SimpleDateFormat
 import java.util.*
 
 class DiaryWriteFragment : Fragment() {
@@ -24,15 +22,22 @@ class DiaryWriteFragment : Fragment() {
     private lateinit var writeButton: Button
     private lateinit var contentView: EditText
     private lateinit var titleInputView: EditText
-    private lateinit var diaryViewModel: DiaryViewModel
+    private val diaryViewModel: DiaryViewModel by lazy {
+        ViewModelProvider(requireActivity(), object: ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return DiaryViewModel(application = requireActivity().application) as T
+            }
+        }).get(DiaryViewModel::class.java)
+    }
     private var dno: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG,"DiaryWriteFragment - onCreate() called")
         super.onCreate(savedInstanceState)
-        diaryViewModel = DiaryViewModel(requireActivity().application)
+
         // dno가 null이 아니면 글을 수정하기 위해 diary를 가져옴
         dno = arguments?.getString("dno")
+        Log.d(TAG,"DiaryWriteFragment - dno : ${dno}() called")
         if (dno != null ) diaryViewModel.getDiary(dno!!)
     }
 
