@@ -12,7 +12,7 @@ import com.goodee.cando_app.dto.DiaryDto
 import com.goodee.cando_app.views.DiaryFragmentDirections
 import java.text.SimpleDateFormat
 
-class DiaryRecyclerViewAdapter(val list: LiveData<List<DiaryDto>>) : RecyclerView.Adapter<DiaryRecyclerViewAdapter.ViewHolder>() {
+class DiaryRecyclerViewAdapter(private val list: LiveData<List<DiaryDto>>) : RecyclerView.Adapter<DiaryRecyclerViewAdapter.ViewHolder>() {
     private val sdf = SimpleDateFormat("yyyy-MM-dd a HH:mm")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = DataBindingUtil.inflate<FragmentDiaryListBinding>(LayoutInflater.from(parent.context),

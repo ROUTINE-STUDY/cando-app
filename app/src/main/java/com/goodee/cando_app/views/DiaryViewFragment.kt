@@ -1,6 +1,5 @@
 package com.goodee.cando_app.views
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -8,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.goodee.cando_app.R
@@ -23,19 +21,11 @@ class DiaryViewFragment : Fragment() {
     private val diaryViewModel: DiaryViewModel by lazy {
         ViewModelProvider(this).get(DiaryViewModel::class.java)
     }
-    private val userViewModel by lazy {
-        ViewModelProvider(requireActivity(), object: ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return UserViewModel(requireActivity().application) as T
-            }
-        }).get(UserViewModel::class.java)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG,"DiaryViewFragment - onCreate() called\n arguments : ${arguments.toString()}")
-        Log.d(TAG,"DiaryViewFragment - userViewModel : ${userViewModel.userLiveData.value}")
         dno = arguments?.get("dno").toString()
+        Log.d(TAG,"DiaryViewFragment - onCreate dno : $dno called")
         diaryViewModel.getDiary(dno)
     }
 
@@ -46,14 +36,15 @@ class DiaryViewFragment : Fragment() {
         Log.d(TAG,"DiaryViewFragment - onCreateView() called")
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_diary_view, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
-        diaryViewModel.diaryLiveData.observe(viewLifecycleOwner, { diaryDto ->
-            Log.d(TAG,"DiaryViewFragment - diaryLivedata change")
+        diaryViewModel.diaryLiveData.observe(viewLifecycleOwner) { diaryDto ->
+            Log.d(TAG, "DiaryViewFragment - diaryLivedata change")
             if (diaryDto != null) {
-                binding.textviewDiaryviewTitleview.text = "제목 : "+diaryDto.title
+                binding.textviewDiaryviewTitleview.text = diaryDto.title
                 binding.textviewDiaryviewContentview.text = diaryDto.content
-                binding.textviewDiaryviewAuthorview.text = "작성자 : "+diaryDto.author
+                binding.textviewDiaryviewAuthorview.text = diaryDto.author
+                binding.progressbarDiaryView.visibility = View.GONE
             }
-        })
+        }
         setEvent()
 
         return binding.root
@@ -62,6 +53,7 @@ class DiaryViewFragment : Fragment() {
     private fun setEvent() {
         binding.buttonDiaryviewEditbutton.setOnClickListener {
             Log.d(TAG,"DiaryViewFragment - editButton is clicked.")
+            Log.d(TAG,"DiaryViewFragment - setEvent() called")
             findNavController().navigate(DiaryViewFragmentDirections.actionDiaryViewFragmentToDiaryWriteFragment(dno))
         }
         binding.buttonDiaryviewDeletebutton.setOnClickListener {

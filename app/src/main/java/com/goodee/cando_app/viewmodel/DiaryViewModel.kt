@@ -31,7 +31,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         appRepository.getDiaryList()
     }
     // 게시글 1개 가져오기
-    fun getDiary(dno: String) {
+    fun getDiary(dno: String = "1") {
         appRepository.getDiary(dno)
     }
     // 글 작성하기
