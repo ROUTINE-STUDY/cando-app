@@ -28,7 +28,7 @@ class DiaryRepository(val application: Application) {
 
     // 게시글 조회(게시글 클릭 시 1개의 게시글을 읽음)
     fun getDiary(dno: String) {
-        Log.d(TAG,"AppRepository - getDiary() called")
+        Log.d(TAG,"AppRepository - getDiary($dno) called")
         FireStoreDatabase.getDatabase().collection(COLLECTION_NAME).document(dno).get().addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 task.result?.let {  result ->
@@ -36,11 +36,10 @@ class DiaryRepository(val application: Application) {
                     val content = result["content"]
                     val author = result["author"]
                     val date: Timestamp = result["date"] as Timestamp
-
                     _diaryLiveData.value = DiaryDto(dno = dno, title = title as String, content = content as String, author = author as String, date = date.toDate())
                 }
             } else {
-                Toast.makeText(application.applicationContext, "글을 읽는데 실패하였습니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(application.applicationContext, application.applicationContext.getString(R.string.toast_diary_read_fail), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -53,11 +52,11 @@ class DiaryRepository(val application: Application) {
             if (task.isSuccessful) {
                 val result = task.result
                 val diaryList = ArrayList<DiaryDto>()
-
-                if (result != null && result.documents != null ) {
+                if (result != null) {
                     result.documents.forEach { diary ->
                         val diaryDto = diary.toObject(DiaryDto::class.java)
                         if (diaryDto != null) {
+                            diaryDto.dno = diary.id
                             diaryList.add(diaryDto)
                         }
                     }
