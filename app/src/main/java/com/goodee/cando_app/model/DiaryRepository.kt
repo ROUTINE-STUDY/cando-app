@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.goodee.cando_app.R
 import com.goodee.cando_app.database.FireStoreDatabase
 import com.goodee.cando_app.database.RealTimeDatabase
 import com.goodee.cando_app.dto.DiaryDto
@@ -12,6 +13,7 @@ import com.goodee.cando_app.viewmodel.DiaryViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.database.*
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 const val COLLECTION_NAME = "diary"
@@ -46,28 +48,25 @@ class DiaryRepository(val application: Application) {
     // 게시글 목록 가져오기(로그인시 바로 보이는 게시글들)
     fun getDiaryList() {
         Log.d(TAG,"AppRepository - getDiaryList() called")
-        val rootRef = RealTimeDatabase.getDatabase().ref
-        val diaryRef = rootRef.child("Diary")
-        val query = diaryRef.orderByChild("dno").limitToLast(10)
-        val valueEventListener = object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                Log.d(TAG,"AppRepository - onDataChange() called")
-                val diaryList = mutableListOf<DiaryDto>()
-                snapshot.children.forEach { ds ->
-                    val dno = ds.key
-                    val author = ds.child("author").value.toString()
-                    val title = ds.child("title").value.toString()
-                    val date = Date(ds.child("date").value.toString().toLong())
-                    diaryList.add(DiaryDto(dno = dno, title = title, content = "", author = author, date = date))
+        val database = FireStoreDatabase.getDatabase()
+        database.collection(COLLECTION_NAME).get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val result = task.result
+                val diaryList = ArrayList<DiaryDto>()
+
+                if (result != null && result.documents != null ) {
+                    result.documents.forEach { diary ->
+                        val diaryDto = diary.toObject(DiaryDto::class.java)
+                        if (diaryDto != null) {
+                            diaryList.add(diaryDto)
+                        }
+                    }
+                    _diaryListLiveData.postValue(diaryList)
                 }
-                diaryList.reverse()
-                _diaryListLiveData.postValue(diaryList)
-            }
-            override fun onCancelled(error: DatabaseError) {
-                Log.d(TAG,"AppRepository - onCancelled() called")
+            } else {
+                Toast.makeText(application.applicationContext, application.applicationContext.getString(R.string.toast_diarys_read_fail), Toast.LENGTH_SHORT).show()
             }
         }
-        query.addListenerForSingleValueEvent(valueEventListener)
     }
 
     // 게시글 작성
