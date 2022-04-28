@@ -104,26 +104,6 @@ class DiaryFragment : Fragment() {
 
         return binding.root
     }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG,"DiaryFragment - onPause() called")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG,"DiaryFragment - onStop() called")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(TAG,"DiaryFragment - onDestroy() called")
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        Log.d(TAG,"DiaryFragment - onDestroyView() called")
-    }
     
     override fun onDetach() {
         super.onDetach()
@@ -133,9 +113,11 @@ class DiaryFragment : Fragment() {
 
     private fun setRecyclerView(diaryLiveData: LiveData<List<DiaryDto>>) {
         Log.d(TAG,"DiaryFragment - setRecyclerView() called")
-        val adapter = DiaryRecyclerViewAdapter(diaryLiveData)
+        val adapter = DiaryRecyclerViewAdapter(diaryViewModel.diaryListLiveData)
         binding.recyclerviewDiaryDiarylist.adapter = adapter
         binding.recyclerviewDiaryDiarylist.layoutManager = LinearLayoutManager(requireActivity())
+        binding.progressbarDiaryLoading.visibility = View.GONE
+
         binding.recyclerviewDiaryDiarylist.addOnScrollListener(
             object: RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
