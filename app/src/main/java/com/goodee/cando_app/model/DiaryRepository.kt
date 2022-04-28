@@ -109,7 +109,8 @@ class DiaryRepository(val application: Application) {
 
     fun deleteDiary(dno: String) {
         Log.d(TAG,"AppRepository - deleteDiary() called")
-        RealTimeDatabase.getDatabase().child("Diary").child(dno).removeValue().addOnCompleteListener { task ->
+        val cloudStore = FireStoreDatabase.getDatabase()
+        cloudStore.collection(COLLECTION_NAME).document(dno).delete().addOnCompleteListener { task ->
             Log.d(TAG,"AppRepository - task.isSuccessful : ${task.isSuccessful}")
             _diaryLiveData.postValue(null)
         }
