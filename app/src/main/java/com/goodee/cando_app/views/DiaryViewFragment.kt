@@ -49,6 +49,7 @@ class DiaryViewFragment : Fragment() {
                 binding.textviewDiaryviewTitleview.text = diaryDto.title
                 binding.textviewDiaryviewContentview.text = diaryDto.content
                 binding.textviewDiaryviewAuthorview.text = diaryDto.author
+                binding.progressbarDiaryView.visibility = View.GONE
             }
         }
         setEvent()
